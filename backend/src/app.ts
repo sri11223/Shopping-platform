@@ -14,6 +14,8 @@ import productRoutes from './routes/product.routes';
 import cartRoutes from './routes/cart.routes';
 import orderRoutes from './routes/order.routes';
 import authRoutes from './routes/auth.routes';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger';
 
 const app = express();
 
@@ -65,6 +67,12 @@ app.get('/api/health', (_req, res) => {
     environment: config.nodeEnv,
   });
 });
+
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'LuxeStore API Docs',
+}));
 
 // Optional auth - sets req.user if token present
 app.use(optionalAuth as any);
