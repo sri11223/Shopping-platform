@@ -1,0 +1,296 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ProductService } from '../../core/services/product.service';
+import { Product } from '../../core/models/types';
+
+@Component({
+  selector: 'app-home',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  template: `
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <span class="hero-badge">🔥 New Collection 2026</span>
+        <h1>Discover Your <span class="gradient-text">Perfect Style</span></h1>
+        <p>Premium fashion, curated collections, and world-class quality — all in one place.</p>
+        <div class="hero-actions">
+          <a routerLink="/products" class="btn-hero">Shop Now →</a>
+          <a routerLink="/products" [queryParams]="{category: 'Shirts'}" class="btn-hero-outline">Explore Shirts</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat">
+            <strong>500+</strong>
+            <span>Products</span>
+          </div>
+          <div class="stat">
+            <strong>50K+</strong>
+            <span>Customers</span>
+          </div>
+          <div class="stat">
+            <strong>4.9★</strong>
+            <span>Rating</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="categories-section">
+      <div class="section-container">
+        <h2 class="section-title">Shop by Category</h2>
+        <p class="section-subtitle">Browse our curated collections</p>
+        <div class="category-grid">
+          <a *ngFor="let cat of categories"
+             [routerLink]="['/products']"
+             [queryParams]="{category: cat.name}"
+             class="category-card"
+             [style.--accent]="cat.color">
+            <span class="cat-emoji">{{ cat.emoji }}</span>
+            <span class="cat-name">{{ cat.name }}</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="featured-section">
+      <div class="section-container">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Trending Now</h2>
+            <p class="section-subtitle">Most popular picks this week</p>
+          </div>
+          <a routerLink="/products" class="view-all">View All →</a>
+        </div>
+        <div class="product-grid">
+          <a *ngFor="let product of featuredProducts"
+             [routerLink]="['/products', product._id]"
+             class="product-card">
+            <div class="product-img">
+              <img [src]="product.images?.[0] || 'https://via.placeholder.com/300'" [alt]="product.name"/>
+              <span class="badge" *ngIf="product.originalPrice && product.originalPrice > product.price">
+                -{{ getDiscount(product) }}%
+              </span>
+            </div>
+            <div class="product-info">
+              <span class="product-brand">{{ product.brand }}</span>
+              <h3>{{ product.name }}</h3>
+              <div class="product-price">
+                <span class="price">₹{{ product.price | number }}</span>
+                <span class="mrp" *ngIf="product.originalPrice && product.originalPrice > product.price">₹{{ product.originalPrice | number }}</span>
+              </div>
+              <div class="product-rating" *ngIf="product.rating">
+                ⭐ {{ product.rating.toFixed(1) }}
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Banner -->
+    <section class="features-banner">
+      <div class="section-container">
+        <div class="features-grid">
+          <div class="feature-item">
+            <span class="feature-icon">🚚</span>
+            <strong>Free Shipping</strong>
+            <span>On orders over ₹999</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🔄</span>
+            <strong>Easy Returns</strong>
+            <span>30-day return policy</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🔒</span>
+            <strong>Secure Payment</strong>
+            <span>100% secure checkout</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">💬</span>
+            <strong>24/7 Support</strong>
+            <span>Dedicated help center</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  `,
+  styles: [`
+    /* Hero */
+    .hero {
+      min-height: 85vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 32px 80px;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(16,185,129,0.06) 0%, transparent 40%);
+    }
+    .hero-content { max-width: 700px; }
+    .hero-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #f8fafc;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p { color: #94a3b8; font-size: 1.15rem; line-height: 1.6; margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto; }
+    .hero-actions { display: flex; gap: 16px; justify-content: center; margin-bottom: 48px; }
+    .btn-hero {
+      padding: 16px 36px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      font-weight: 700;
+      font-size: 1.05rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    }
+    .btn-hero:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(59, 130, 246, 0.4); }
+    .btn-hero-outline {
+      padding: 16px 36px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e2e8f0;
+      font-weight: 600;
+      font-size: 1.05rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-hero-outline:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); }
+    .hero-stats { display: flex; justify-content: center; gap: 48px; }
+    .stat { display: flex; flex-direction: column; align-items: center; }
+    .stat strong { color: #f8fafc; font-size: 1.4rem; font-weight: 800; }
+    .stat span { color: #64748b; font-size: 0.8rem; }
+
+    /* Sections */
+    .section-container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+    .section-title { color: #f8fafc; font-size: 1.8rem; font-weight: 800; }
+    .section-subtitle { color: #64748b; margin-top: 4px; font-size: 0.95rem; }
+    .section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; }
+    .view-all { color: #3b82f6; font-weight: 600; text-decoration: none; font-size: 0.95rem; }
+    .view-all:hover { text-decoration: underline; }
+
+    /* Categories */
+    .categories-section { padding: 80px 0; }
+    .categories-section .section-title { text-align: center; }
+    .categories-section .section-subtitle { text-align: center; margin-bottom: 40px; }
+    .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
+    .category-card {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 28px 16px; border-radius: 16px;
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid rgba(255,255,255,0.06);
+      text-decoration: none; transition: all 0.25s;
+      cursor: pointer;
+    }
+    .category-card:hover { border-color: rgba(59,130,246,0.2); background: rgba(59,130,246,0.06); transform: translateY(-4px); }
+    .cat-emoji { font-size: 2rem; }
+    .cat-name { color: #e2e8f0; font-weight: 600; font-size: 0.85rem; }
+
+    /* Featured Products */
+    .featured-section { padding: 80px 0; }
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+    .product-card {
+      background: rgba(30,41,59,0.5);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      overflow: hidden;
+      text-decoration: none;
+      transition: all 0.25s;
+      position: relative;
+    }
+    .product-card:hover { border-color: rgba(59,130,246,0.2); transform: translateY(-4px); }
+    .product-img { height: 240px; overflow: hidden; position: relative; }
+    .product-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+    .product-card:hover .product-img img { transform: scale(1.05); }
+    .badge {
+      position: absolute; top: 12px; left: 12px;
+      padding: 4px 10px; border-radius: 8px;
+      background: rgba(239, 68, 68, 0.9); color: white;
+      font-size: 0.75rem; font-weight: 700;
+    }
+    .product-info { padding: 16px; }
+    .product-brand { color: #64748b; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .product-info h3 { color: #e2e8f0; font-size: 0.95rem; font-weight: 600; margin: 6px 0 10px; line-height: 1.3; }
+    .product-price { display: flex; align-items: center; gap: 8px; }
+    .price { color: #f8fafc; font-weight: 700; font-size: 1.05rem; }
+    .mrp { color: #64748b; text-decoration: line-through; font-size: 0.85rem; }
+    .product-rating { margin-top: 8px; color: #fcd34d; font-size: 0.85rem; }
+
+    /* Features */
+    .features-banner { padding: 60px 0 80px; }
+    .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    .feature-item {
+      display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
+      padding: 28px 16px; border-radius: 16px;
+      background: rgba(30,41,59,0.3);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .feature-icon { font-size: 1.8rem; }
+    .feature-item strong { color: #f8fafc; font-size: 0.95rem; }
+    .feature-item span { color: #64748b; font-size: 0.8rem; }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.2rem; }
+      .hero-actions { flex-direction: column; align-items: center; }
+      .hero-stats { gap: 24px; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .category-grid { grid-template-columns: repeat(3, 1fr); }
+      .product-grid { grid-template-columns: 1fr 1fr; }
+    }
+  `]
+})
+export class HomeComponent implements OnInit {
+  categories = [
+    { name: 'Shirts', emoji: '👔', color: '#3b82f6' },
+    { name: 'Jeans', emoji: '👖', color: '#2563eb' },
+    { name: 'Jackets', emoji: '🧥', color: '#7c3aed' },
+    { name: 'Dresses', emoji: '👗', color: '#ec4899' },
+    { name: 'Shoes', emoji: '👟', color: '#10b981' },
+    { name: 'Watches', emoji: '⌚', color: '#f59e0b' },
+    { name: 'Bags', emoji: '👜', color: '#6366f1' },
+    { name: 'Accessories', emoji: '🕶️', color: '#8b5cf6' },
+  ];
+
+  featuredProducts: Product[] = [];
+
+  constructor(private productService: ProductService) {}
+
+  ngOnInit(): void {
+    this.productService.getProducts({ limit: 8, sort: 'rating' }).subscribe({
+      next: (res) => {
+        this.featuredProducts = res.data;
+      }
+    });
+  }
+
+  getDiscount(product: Product): number {
+    if (!product.originalPrice || product.originalPrice <= product.price) return 0;
+    return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+  }
+}
