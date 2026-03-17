@@ -1,0 +1,41 @@
+<div class="wishlist-page">
+  <h1 class="page-title">❤️ My Wishlist</h1>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading wishlist...</p>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" *ngIf="!isLoading && wishlist.length === 0">
+    <div class="empty-icon">💔</div>
+    <h2>Your wishlist is empty</h2>
+    <p>Save items you love to find them later</p>
+    <a routerLink="/products" class="btn-primary">Browse Products</a>
+  </div>
+
+  <!-- Wishlist Grid -->
+  <div class="wishlist-grid" *ngIf="!isLoading && wishlist.length > 0">
+    <div class="wish-card" *ngFor="let product of wishlist">
+      <button class="remove-btn" (click)="removeFromWishlist(product._id)" [disabled]="removingId === product._id" title="Remove from wishlist">{{ removingId === product._id ? '...' : '✕' }}</button>
+      <a [routerLink]="['/products', product._id]" class="wish-link">
+        <div class="wish-img">
+          <img [src]="product.images?.[0] || 'https://via.placeholder.com/240'" [alt]="product.name" />
+        </div>
+        <div class="wish-info">
+          <span class="wish-brand">{{ product.brand }}</span>
+          <h3 class="wish-name">{{ product.name }}</h3>
+          <div class="wish-price">
+            <span class="price">₹{{ product.price | number }}</span>
+            <span class="mrp" *ngIf="product.originalPrice && product.originalPrice > product.price">₹{{ product.originalPrice | number }}</span>
+            <span class="discount" *ngIf="product.originalPrice && product.originalPrice > product.price">{{ getDiscount(product) }}% off</span>
+          </div>
+        </div>
+      </a>
+      <button class="btn-move-cart" (click)="moveToCart(product)" [disabled]="movingToCartId === product._id">
+        {{ movingToCartId === product._id ? 'Moving...' : '🛒 Move to Cart' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,106 @@
+<div class="order-page" *ngIf="order">
+      <!-- Success Banner -->
+      <div class="success-banner">
+        <div class="success-icon">✓</div>
+        <h1>Order Placed Successfully!</h1>
+        <p>Your order <strong>{{ order.orderNumber }}</strong> has been confirmed</p>
+      </div>
+
+      <div class="order-layout">
+        <!-- Order Details -->
+        <div class="detail-section">
+          <div class="detail-card">
+            <h2 class="card-title">Order Details</h2>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="detail-label">Order Number</span>
+                <span class="detail-value highlight">{{ order.orderNumber }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Order Date</span>
+                <span class="detail-value">{{ order.createdAt | date:'medium' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Status</span>
+                <span class="status-badge status-{{ order.status }}">{{ order.status | titlecase }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Payment</span>
+                <span class="status-badge payment-{{ order.paymentStatus }}">{{ order.paymentStatus | titlecase }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Items -->
+          <div class="detail-card">
+            <h2 class="card-title">Items Ordered</h2>
+            <div class="order-items">
+              <div class="order-item" *ngFor="let item of order.items">
+                <div class="order-item-img">
+                  <img [src]="item.image || 'https://via.placeholder.com/64'" [alt]="item.name" />
+                </div>
+                <div class="order-item-info">
+                  <span class="order-item-name">{{ item.name }}</span>
+                  <span class="order-item-qty">Qty: {{ item.quantity }} × ₹{{ item.price | number }}</span>
+                </div>
+                <span class="order-item-total">₹{{ item.price * item.quantity | number }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shipping -->
+          <div class="detail-card">
+            <h2 class="card-title">Shipping Address</h2>
+            <div class="address-block">
+              <p class="address-name">{{ order.shippingAddress.fullName }}</p>
+              <p>{{ order.shippingAddress.addressLine1 }}</p>
+              <p *ngIf="order.shippingAddress.addressLine2">{{ order.shippingAddress.addressLine2 }}</p>
+              <p>{{ order.shippingAddress.city }}, {{ order.shippingAddress.state }} - {{ order.shippingAddress.pincode }}</p>
+              <p>{{ order.shippingAddress.country }}</p>
+              <p class="address-contact">📧 {{ order.shippingAddress.email }} | 📱 {{ order.shippingAddress.phone }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Summary -->
+        <div class="summary-sidebar">
+          <div class="detail-card">
+            <h3 class="card-title">Payment Summary</h3>
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <span>₹{{ order.subtotal | number }}</span>
+            </div>
+            <div class="summary-row">
+              <span>Tax (GST)</span>
+              <span>₹{{ order.tax | number:'1.2-2' }}</span>
+            </div>
+            <div class="summary-row">
+              <span>Shipping</span>
+              <span [class.free]="order.shippingCharge === 0">{{ order.shippingCharge === 0 ? 'FREE' : '₹' + order.shippingCharge }}</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row total">
+              <span>Total Paid</span>
+              <span>₹{{ order.totalAmount | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <a routerLink="/products" class="btn-continue">Continue Shopping</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Loading order details...</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-state" *ngIf="!isLoading && !order">
+      <h2>Order not found</h2>
+      <p>The order you're looking for doesn't exist</p>
+      <a routerLink="/products" class="btn-primary">Go to Shop</a>
+    </div>

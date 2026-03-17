@@ -1,0 +1,139 @@
+<div class="checkout-page">
+      <h1 class="page-title">Checkout</h1>
+
+      <!-- Redirect if empty -->
+      <div class="empty-state" *ngIf="cart && cart.items.length === 0">
+        <h2>No items to checkout</h2>
+        <p>Add items to your cart first</p>
+        <a routerLink="/products" class="btn-primary">Browse Products</a>
+      </div>
+
+      <div class="checkout-layout" *ngIf="cart && cart.items.length > 0">
+        <!-- Shipping Form -->
+        <div class="form-section">
+          <div class="section-card">
+            <h2 class="section-heading">
+              <span class="step-number">1</span>
+              Shipping Information
+            </h2>
+            <form [formGroup]="shippingForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fullName">Full Name *</label>
+                  <input id="fullName" formControlName="fullName" placeholder="Enter your full name" />
+                  <span class="error" *ngIf="isFieldInvalid('fullName')">Full name is required</span>
+                </div>
+                <div class="form-group">
+                  <label for="email">Email *</label>
+                  <input id="email" formControlName="email" type="email" placeholder="your@email.com" />
+                  <span class="error" *ngIf="isFieldInvalid('email')">Valid email is required</span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="phone">Phone *</label>
+                  <input id="phone" formControlName="phone" placeholder="10-digit mobile number" />
+                  <span class="error" *ngIf="isFieldInvalid('phone')">Valid 10-digit phone is required</span>
+                </div>
+                <div class="form-group">
+                  <label for="pincode">Pincode *</label>
+                  <input id="pincode" formControlName="pincode" placeholder="6-digit pincode" />
+                  <span class="error" *ngIf="isFieldInvalid('pincode')">Valid 6-digit pincode required</span>
+                </div>
+              </div>
+
+              <div class="form-group full">
+                <label for="addressLine1">Address Line 1 *</label>
+                <input id="addressLine1" formControlName="addressLine1" placeholder="House no., Street name" />
+                <span class="error" *ngIf="isFieldInvalid('addressLine1')">Address is required</span>
+              </div>
+
+              <div class="form-group full">
+                <label for="addressLine2">Address Line 2</label>
+                <input id="addressLine2" formControlName="addressLine2" placeholder="Landmark, Area (optional)" />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="city">City *</label>
+                  <input id="city" formControlName="city" placeholder="City" />
+                  <span class="error" *ngIf="isFieldInvalid('city')">City is required</span>
+                </div>
+                <div class="form-group">
+                  <label for="state">State *</label>
+                  <input id="state" formControlName="state" placeholder="State" />
+                  <span class="error" *ngIf="isFieldInvalid('state')">State is required</span>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="section-card">
+            <h2 class="section-heading">
+              <span class="step-number">2</span>
+              Additional Notes
+            </h2>
+            <div class="form-group full">
+              <textarea
+                [(ngModel)]="notes"
+                placeholder="Any special instructions for delivery..."
+                class="notes-input"
+                rows="3"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Review -->
+        <div class="summary-section">
+          <div class="section-card">
+            <h3 class="summary-heading">Order Review</h3>
+
+            <div class="review-items">
+              <div class="review-item" *ngFor="let item of cart.items">
+                <div class="review-img">
+                  <img [src]="item.image || 'https://via.placeholder.com/48'" [alt]="item.name" />
+                </div>
+                <div class="review-details">
+                  <span class="review-name">{{ item.name }}</span>
+                  <span class="review-qty">Qty: {{ item.quantity }}</span>
+                </div>
+                <span class="review-price">₹{{ item.price * item.quantity | number }}</span>
+              </div>
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <span>₹{{ getSubtotal() | number }}</span>
+            </div>
+            <div class="summary-row">
+              <span>GST (18%)</span>
+              <span>₹{{ getTax() | number:'1.2-2' }}</span>
+            </div>
+            <div class="summary-row">
+              <span>Shipping</span>
+              <span [class.free]="getSubtotal() >= 999">{{ getSubtotal() >= 999 ? 'FREE' : '₹99' }}</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row total">
+              <span>Total</span>
+              <span>₹{{ getTotal() | number:'1.2-2' }}</span>
+            </div>
+
+            <button
+              class="btn-place-order"
+              (click)="placeOrder()"
+              [disabled]="isSubmitting"
+              id="place-order-btn"
+            >
+              {{ isSubmitting ? 'Placing Order...' : 'Place Order' }}
+            </button>
+
+            <p class="secure-notice">🔒 Your information is secure and encrypted</p>
+          </div>
+        </div>
+      </div>
+    </div>

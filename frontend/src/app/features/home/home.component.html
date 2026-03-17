@@ -1,0 +1,108 @@
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <span class="hero-badge">🔥 New Collection 2026</span>
+    <h1>Discover Your <span class="gradient-text">Perfect Style</span></h1>
+    <p>Premium fashion, curated collections, and world-class quality — all in one place.</p>
+    <div class="hero-actions">
+      <a routerLink="/products" class="btn-hero">Shop Now →</a>
+      <a routerLink="/products" [queryParams]="{category: 'Shirts'}" class="btn-hero-outline">Explore Shirts</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <strong>500+</strong>
+        <span>Products</span>
+      </div>
+      <div class="stat">
+        <strong>50K+</strong>
+        <span>Customers</span>
+      </div>
+      <div class="stat">
+        <strong>4.9★</strong>
+        <span>Rating</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories Section -->
+<section class="categories-section">
+  <div class="section-container">
+    <h2 class="section-title">Shop by Category</h2>
+    <p class="section-subtitle">Browse our curated collections</p>
+    <div class="category-grid">
+      <a *ngFor="let cat of categories"
+         [routerLink]="['/products']"
+         [queryParams]="{category: cat.name}"
+         class="category-card"
+         [style.--accent]="cat.color">
+        <span class="cat-emoji">{{ cat.emoji }}</span>
+        <span class="cat-name">{{ cat.name }}</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Products -->
+<section class="featured-section">
+  <div class="section-container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Trending Now</h2>
+        <p class="section-subtitle">Most popular picks this week</p>
+      </div>
+      <a routerLink="/products" class="view-all">View All →</a>
+    </div>
+    <div class="product-grid">
+      <a *ngFor="let product of featuredProducts"
+         [routerLink]="['/products', product._id]"
+         class="product-card">
+        <div class="product-img">
+          <img [src]="product.images?.[0] || 'https://via.placeholder.com/300'" [alt]="product.name"/>
+          <span class="badge" *ngIf="product.originalPrice && product.originalPrice > product.price">
+            -{{ getDiscount(product) }}%
+          </span>
+        </div>
+        <div class="product-info">
+          <span class="product-brand">{{ product.brand }}</span>
+          <h3>{{ product.name }}</h3>
+          <div class="product-price">
+            <span class="price">₹{{ product.price | number }}</span>
+            <span class="mrp" *ngIf="product.originalPrice && product.originalPrice > product.price">₹{{ product.originalPrice | number }}</span>
+          </div>
+          <div class="product-rating" *ngIf="product.rating">
+            ⭐ {{ product.rating.toFixed(1) }}
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Features Banner -->
+<section class="features-banner">
+  <div class="section-container">
+    <div class="features-grid">
+      <div class="feature-item">
+        <span class="feature-icon">🚚</span>
+        <strong>Free Shipping</strong>
+        <span>On orders over ₹999</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🔄</span>
+        <strong>Easy Returns</strong>
+        <span>30-day return policy</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🔒</span>
+        <strong>Secure Payment</strong>
+        <span>100% secure checkout</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">💬</span>
+        <strong>24/7 Support</strong>
+        <span>Dedicated help center</span>
+      </div>
+    </div>
+  </div>
+</section>

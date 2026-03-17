@@ -1,0 +1,44 @@
+<div class="orders-page">
+      <h1 class="page-title">📦 My Orders</h1>
+
+      <!-- Loading -->
+      <div class="loading" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Loading orders...</p>
+      </div>
+
+      <!-- Empty -->
+      <div class="empty-state" *ngIf="!isLoading && orders.length === 0">
+        <div class="empty-icon">📋</div>
+        <h2>No orders yet</h2>
+        <p>Start shopping and your orders will appear here</p>
+        <a routerLink="/products" class="btn-primary">Browse Products</a>
+      </div>
+
+      <!-- Orders List -->
+      <div class="orders-list" *ngIf="!isLoading && orders.length > 0">
+        <a [routerLink]="['/orders', order.orderNumber]" class="order-card" *ngFor="let order of orders">
+          <div class="order-header">
+            <div class="order-info">
+              <span class="order-number">{{ order.orderNumber }}</span>
+              <span class="order-date">{{ order.createdAt | date:'mediumDate' }}</span>
+            </div>
+            <div class="order-badges">
+              <span class="status-badge status-{{ order.status }}">{{ order.status | titlecase }}</span>
+              <span class="status-badge payment-{{ order.paymentStatus }}">{{ order.paymentStatus | titlecase }}</span>
+            </div>
+          </div>
+          <div class="order-items-preview">
+            <div class="item-thumb" *ngFor="let item of order.items.slice(0, 4)">
+              <img [src]="item.image || 'https://via.placeholder.com/48'" [alt]="item.name" />
+            </div>
+            <span class="more-items" *ngIf="order.items.length > 4">+{{ order.items.length - 4 }} more</span>
+          </div>
+          <div class="order-footer">
+            <span class="order-total">₹{{ order.totalAmount | number:'1.2-2' }}</span>
+            <span class="order-item-count">{{ order.items.length }} item{{ order.items.length > 1 ? 's' : '' }}</span>
+            <span class="view-detail">View Details →</span>
+          </div>
+        </a>
+      </div>
+    </div>

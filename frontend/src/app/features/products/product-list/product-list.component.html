@@ -1,0 +1,152 @@
+<div class="product-list-page">
+      <!-- Hero Banner -->
+      <section class="hero-banner">
+        <div class="hero-content">
+          <h1 class="hero-title">Discover Your Style</h1>
+          <p class="hero-subtitle">Explore our curated collection of premium fashion</p>
+        </div>
+      </section>
+
+      <div class="main-content">
+        <!-- Filters Sidebar -->
+        <aside class="filters-sidebar" [class.open]="filtersOpen">
+          <div class="filter-header">
+            <h3>Filters</h3>
+            <button class="filter-clear" (click)="clearFilters()">Clear All</button>
+          </div>
+
+          <!-- Search -->
+          <div class="filter-group">
+            <label class="filter-label">Search</label>
+            <input
+              type="text"
+              class="filter-input"
+              placeholder="Search products..."
+              [(ngModel)]="searchQuery"
+              (ngModelChange)="onSearchChange($event)"
+              id="search-input"
+            />
+          </div>
+
+          <!-- Categories -->
+          <div class="filter-group">
+            <label class="filter-label">Category</label>
+            <div class="filter-options">
+              <button
+                *ngFor="let cat of categories"
+                class="filter-chip"
+                [class.active]="selectedCategory === cat"
+                (click)="selectCategory(cat)"
+              >{{ cat }}</button>
+            </div>
+          </div>
+
+          <!-- Brands -->
+          <div class="filter-group">
+            <label class="filter-label">Brand</label>
+            <div class="filter-options">
+              <button
+                *ngFor="let brand of brands"
+                class="filter-chip"
+                [class.active]="selectedBrand === brand"
+                (click)="selectBrand(brand)"
+              >{{ brand }}</button>
+            </div>
+          </div>
+
+          <!-- Price Range -->
+          <div class="filter-group">
+            <label class="filter-label">Price Range</label>
+            <div class="price-inputs">
+              <input type="number" placeholder="Min" [(ngModel)]="minPrice" class="filter-input price-input" (change)="applyFilters()" />
+              <span class="price-separator">—</span>
+              <input type="number" placeholder="Max" [(ngModel)]="maxPrice" class="filter-input price-input" (change)="applyFilters()" />
+            </div>
+          </div>
+
+          <button class="mobile-close-filters" (click)="filtersOpen = false">Apply Filters</button>
+        </aside>
+
+        <!-- Products Grid -->
+        <main class="products-section">
+          <!-- Toolbar -->
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="filter-toggle" (click)="filtersOpen = !filtersOpen">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+                Filters
+              </button>
+              <span class="result-count" *ngIf="meta">{{ meta.total }} products found</span>
+            </div>
+            <div class="toolbar-right">
+              <select [(ngModel)]="sortBy" (change)="applyFilters()" class="sort-select" id="sort-select">
+                <option value="newest">Newest</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="rating">Top Rated</option>
+                <option value="name_asc">A to Z</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Loading -->
+          <div class="loading-grid" *ngIf="isLoading">
+            <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6,7,8]">
+              <div class="skeleton-img"></div>
+              <div class="skeleton-text"></div>
+              <div class="skeleton-text short"></div>
+            </div>
+          </div>
+
+          <!-- Product Grid -->
+          <div class="product-grid" *ngIf="!isLoading">
+            <div class="product-card" *ngFor="let product of products; trackBy: trackByProductId" id="product-{{ product._id }}">
+              <a [routerLink]="['/products', product._id]" class="product-image-wrap">
+                <img [src]="product.images[0]" [alt]="product.name" class="product-image" loading="lazy" />
+                <div class="discount-badge" *ngIf="getDiscount(product) > 0">-{{ getDiscount(product) }}%</div>
+              </a>
+              <button class="wishlist-heart" (click)="toggleWishlist(product)" [class.active]="isInWishlist(product._id)" title="Add to wishlist">
+                {{ isInWishlist(product._id) ? '❤️' : '🤍' }}
+              </button>
+              <div class="product-info">
+                <span class="product-brand">{{ product.brand }}</span>
+                <a [routerLink]="['/products', product._id]" class="product-name">{{ product.name }}</a>
+                <div class="product-rating">
+                  <span class="stars">
+                    <span *ngFor="let star of getStars(product.rating)" class="star" [class.filled]="star === 'filled'" [class.half]="star === 'half'">★</span>
+                  </span>
+                  <span class="review-count">({{ product.reviewCount }})</span>
+                </div>
+                <div class="product-price-row">
+                  <span class="product-price">₹{{ product.price | number }}</span>
+                  <span class="product-original-price" *ngIf="product.originalPrice > product.price">₹{{ product.originalPrice | number }}</span>
+                </div>
+                <button class="add-to-cart-btn" (click)="addToCart(product)" [disabled]="product.stock === 0 || addingToCartId === product._id" id="add-to-cart-{{ product._id }}">
+                  {{ addingToCartId === product._id ? 'Adding...' : (product.stock === 0 ? 'Out of Stock' : 'Add to Cart') }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state" *ngIf="!isLoading && products.length === 0">
+            <div class="empty-icon">🔍</div>
+            <h3>No products found</h3>
+            <p>Try adjusting your filters or search query</p>
+            <button class="btn-primary" (click)="clearFilters()">Clear Filters</button>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination" *ngIf="meta && meta.totalPages > 1">
+            <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">← Prev</button>
+            <button
+              *ngFor="let page of getPageNumbers()"
+              class="page-btn"
+              [class.active]="page === currentPage"
+              (click)="goToPage(page)"
+            >{{ page }}</button>
+            <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === meta.totalPages">Next →</button>
+          </div>
+        </main>
+      </div>
+    </div>

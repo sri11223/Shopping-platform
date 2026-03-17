@@ -1,0 +1,74 @@
+<div class="profile-page" *ngIf="user">
+      <div class="profile-header">
+        <div class="avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
+        <h1>{{ user.name }}</h1>
+        <p>{{ user.email }}</p>
+        <span class="member-since">Member since {{ user.createdAt | date:'MMMM yyyy' }}</span>
+      </div>
+
+      <div class="profile-layout">
+        <!-- Profile Details Card -->
+        <div class="profile-card">
+          <h2 class="card-title">
+            <span class="title-icon">👤</span>
+            Personal Information
+          </h2>
+          <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input formControlName="name" placeholder="Your name" />
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input formControlName="phone" placeholder="10-digit mobile" />
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input [value]="user.email" disabled class="disabled-input" />
+              <span class="hint">Email cannot be changed</span>
+            </div>
+            <button type="submit" class="btn-save" [disabled]="isSaving">
+              {{ isSaving ? 'Saving...' : 'Save Changes' }}
+            </button>
+          </form>
+        </div>
+
+        <!-- Quick Links Card -->
+        <div class="profile-card">
+          <h2 class="card-title">
+            <span class="title-icon">⚡</span>
+            Quick Links
+          </h2>
+          <div class="quick-links">
+            <a routerLink="/wishlist" class="quick-link">
+              <span class="ql-icon">❤️</span>
+              <span class="ql-text">
+                <strong>My Wishlist</strong>
+                <span>{{ user.wishlist?.length || 0 }} items saved</span>
+              </span>
+              <span class="ql-arrow">→</span>
+            </a>
+            <a routerLink="/cart" class="quick-link">
+              <span class="ql-icon">🛒</span>
+              <span class="ql-text">
+                <strong>Shopping Cart</strong>
+                <span>View your cart</span>
+              </span>
+              <span class="ql-arrow">→</span>
+            </a>
+            <a routerLink="/products" class="quick-link">
+              <span class="ql-icon">🛍️</span>
+              <span class="ql-text">
+                <strong>Browse Products</strong>
+                <span>Discover new items</span>
+              </span>
+              <span class="ql-arrow">→</span>
+            </a>
+          </div>
+
+          <button class="btn-logout" (click)="logout()">
+            🚪 Sign Out
+          </button>
+        </div>
+      </div>
+    </div>

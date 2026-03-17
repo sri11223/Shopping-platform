@@ -1,0 +1,38 @@
+<div class="auth-page">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="logo-icon">🛍️</div>
+          <h1>Create Account</h1>
+          <p>Join LuxeStore for exclusive access</p>
+        </div>
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input id="name" formControlName="name" placeholder="Enter your name" autocomplete="name" />
+            <span class="error" *ngIf="isFieldInvalid('name')">Name is required (min 2 chars)</span>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input id="email" type="email" formControlName="email" placeholder="you@example.com" autocomplete="email" />
+            <span class="error" *ngIf="isFieldInvalid('email')">Valid email is required</span>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone (optional)</label>
+            <input id="phone" formControlName="phone" placeholder="10-digit mobile number" />
+            <span class="error" *ngIf="isFieldInvalid('phone')">Valid 10-digit phone required</span>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Min 6 characters" autocomplete="new-password" />
+            <button type="button" class="toggle-password" (click)="showPassword = !showPassword">{{ showPassword ? '🙈' : '👁️' }}</button>
+            <span class="error" *ngIf="isFieldInvalid('password')">Password must be at least 6 characters</span>
+          </div>
+          <button type="submit" class="btn-submit" [disabled]="isLoading" id="register-submit">
+            {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+          </button>
+        </form>
+        <div class="auth-footer">
+          <p>Already have an account? <a routerLink="/login">Sign in</a></p>
+        </div>
+      </div>
+    </div>
