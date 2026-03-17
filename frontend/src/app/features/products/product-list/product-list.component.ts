@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { ProductService } from '../../../core/services/product.service';
@@ -39,20 +39,38 @@ export class ProductListComponent implements OnInit, OnDestroy {
     private productService: ProductService,
     private cartService: CartService,
     private toastService: ToastService,
-    private authService: AuthService
+    private authService: AuthService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadProducts();
+    // Listen to query parameters to apply filters
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      this.selectedCategory = params['category'] || '';
+      this.selectedBrand = params['brand'] || '';
+      this.searchQuery = params['search'] || '';
+      this.minPrice = params['minPrice'] ? Number(params['minPrice']) : null;
+      this.maxPrice = params['maxPrice'] ? Number(params['maxPrice']) : null;
+      this.sortBy = params['sort'] || 'newest';
+      this.currentPage = params['page'] ? Number(params['page']) : 1;
+      
+      this.loadProducts();
+    });
+
     this.loadFilters();
 
+    // Setup search debounce to update URL param
     this.searchSubject.pipe(
       debounceTime(400),
       distinctUntilChanged(),
       takeUntil(this.destroy$)
-    ).subscribe(() => {
-      this.currentPage = 1;
-      this.loadProducts();
+    ).subscribe((query) => {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { search: query || null, page: null },
+        queryParamsHandling: 'merge'
+      });
     });
   }
 
@@ -105,31 +123,41 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   selectCategory(cat: string): void {
-    this.selectedCategory = this.selectedCategory === cat ? '' : cat;
-    this.currentPage = 1;
-    this.loadProducts();
+    const category = this.selectedCategory === cat ? null : cat;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { category, page: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   selectBrand(brand: string): void {
-    this.selectedBrand = this.selectedBrand === brand ? '' : brand;
-    this.currentPage = 1;
-    this.loadProducts();
+    const newBrand = this.selectedBrand === brand ? null : brand;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { brand: newBrand, page: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   applyFilters(): void {
-    this.currentPage = 1;
-    this.loadProducts();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { 
+        minPrice: this.minPrice || null,
+        maxPrice: this.maxPrice || null,
+        sort: this.sortBy !== 'newest' ? this.sortBy : null,
+        page: null
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 
   clearFilters(): void {
-    this.searchQuery = '';
-    this.selectedCategory = '';
-    this.selectedBrand = '';
-    this.minPrice = null;
-    this.maxPrice = null;
-    this.sortBy = 'newest';
-    this.currentPage = 1;
-    this.loadProducts();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {}
+    });
   }
 
   addToCart(product: Product): void {
@@ -149,8 +177,11 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   goToPage(page: number): void {
     if (page >= 1 && this.meta && page <= this.meta.totalPages) {
-      this.currentPage = page;
-      this.loadProducts();
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { page: page > 1 ? page : null },
+        queryParamsHandling: 'merge'
+      });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
