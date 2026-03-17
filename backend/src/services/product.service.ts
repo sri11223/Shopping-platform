@@ -71,7 +71,7 @@ export class ProductService {
     ]);
 
     return {
-      data: products as IProduct[],
+      data: products as unknown as IProduct[],
       meta: {
         page,
         limit,
@@ -92,7 +92,7 @@ export class ProductService {
     }
 
     cacheService.set(cacheKey, product, 600); // 10 min cache
-    return product as IProduct;
+    return product as unknown as IProduct;
   }
 
   async getCategories(): Promise<string[]> {
@@ -125,7 +125,7 @@ export class ProductService {
       .lean()
       .exec();
 
-    return products as IProduct[];
+    return products as unknown as IProduct[];
   }
 }
 
